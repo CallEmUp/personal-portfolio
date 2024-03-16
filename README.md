@@ -1,14 +1,14 @@
 
 <h2>
   Personal Portfolio
-  <a href="https://github.com/CallEmUp/Personal-Website" target="_blank">Website</a>
+  <a href="https://github.com/CallEmUp/personal-portfolio" target="_blank">Website</a>
 </h2>
 
 This is my website to resume my work as a data scientist.
 The page mainly uses React and react-bootstrap and is inspired by open-source components.
 
 
-**[Live Demo](https://github.com/CallEmUp/Personal-Website.git)**
+**[Live Demo](https://github.com/CallEmUp/personal-portfolio.git)**
 
 <img src="./src/assets/images/website.gif" alt="demo">
 
