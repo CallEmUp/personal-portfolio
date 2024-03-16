@@ -10,18 +10,16 @@ The page mainly uses React and react-bootstrap and is inspired by open-source co
 
 **[Live Demo](https://github.com/CallEmUp/personal-portfolio.git)**
 
-<img src="./src/assets/images/website.gif" alt="demo">
-
 
 ## Installation Guide
 
 * Fork the project 
   ```
-  https://github.com/CallEmUp/Personal-Website/fork
+  https://github.com/CallEmUp/personal-portfolio/fork
   ```
 * Clone your fork
   ```
-  git clone https://github.com/{yourusername}/Personal-Website.git
+  git clone https://github.com/{yourusername}/personal-portfolio.git
   ```
 * Install the packages
   ```
