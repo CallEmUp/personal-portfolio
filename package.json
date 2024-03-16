@@ -1,7 +1,7 @@
 {
   "name": "website",
   "version": "0.1.0",
-  "homepage": "https://github.com/CallEmUp/Personal-Website",
+  "homepage": "https://github.com/CallEmUp/personal-portfolio",
   "private": true,
   "dependencies": {
     "@iconify/iconify": "^2.1.0",
@@ -51,8 +51,11 @@
   "devDependencies": {
     "gh-pages": "^3.2.3"
   },
+  "engines": {
+    "node": "20.x"
+  }, 
   
-  "description": "<h2>   Personal Portfolio   <a href=\"https://github.com/CallEmUp/Personal-Website\" target=\"_blank\">Website</a> </h2>",
+  "description": "<,>   Personal Portfolio Website   <,>",
   "main": "index.js",
   "author": "Trenton vonHartitzsch",
   "license": "ISC"
