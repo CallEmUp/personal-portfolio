@@ -1,7 +1,7 @@
 {
   "name": "website",
   "version": "0.1.0",
-  "homepage": "/CallEmUp/personal-portfolio",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "@iconify/iconify": "^2.1.0",
