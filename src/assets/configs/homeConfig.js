@@ -22,6 +22,15 @@ const homeConfig = {
     workTimeline: [
         {
             id: "work-0",
+            title: "Technology Intern",
+            company: "L.D. Kerns Contractors",
+            description: "Supported and enhanced L.D. Kerns Contractors digital infrastructure by implementing new technologies and collaborating on web development projects, gaining experience in system administration and project management within the construction industry",
+            date: "June 2024-August 2024",
+            icon: <BsClipboardData/>,
+            tags: ["CSS", "Flask", "Postgresql", "Python"]
+        },
+        {
+            id: "work-1",
             title: "Web Developer",
             company: "Self-Employed",
             description: "Designed, implemented, and monitored web pages, plugins, and functionality for continuous improvement for small businesses.",
