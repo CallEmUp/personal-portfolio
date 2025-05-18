@@ -2,6 +2,8 @@
 
 This is a personal portfolio project showcasing various projects and skills. The portfolio is designed to be mobile-friendly and includes sections such as About, Contact, Experience, Projects, and Skills.
 
+**[Live Demo](https://trentonvonH.com)**
+
 ## Getting Started
 
 ### Prerequisites
