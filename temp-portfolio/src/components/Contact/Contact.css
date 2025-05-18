@@ -1,0 +1,149 @@
+/* Base container with shadow at rest */
+.contact-container {
+  position: relative;
+  background-color: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: .75rem;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+  overflow: visible;
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 1;
+}
+
+/* Glow effect for the container */
+.contact-container::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(45deg, #f97316, #facc15, #f97316);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.65;
+  filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.contact-container:hover::before {
+  opacity: 0.8;
+  filter: blur(15px);
+  inset: -6px;
+}
+
+/* Ensure container background is opaque */
+.contact-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #333333;
+  z-index: -1;
+}
+
+/* Input field focus styling */
+input:focus, textarea:focus {
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.5);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Button styling */
+.send-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 200px;
+  padding: 12px 24px;
+  margin: 0 auto;
+}
+
+.send-button span {
+  flex: 1;
+  text-align: center;
+  padding-right: 10px;
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: more) {
+  .contact-container::before {
+    opacity: 0.8;
+    filter: blur(6px);
+  }
+}
+
+/* Remove shadow when cursor is nearby */
+.contact-container.nearby {
+  box-shadow: none;
+}
+
+/* Cursor-following glow wrapper */
+.glow-wrapper {
+  position: absolute;
+  inset: -6px; /* Slightly larger than the container */
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 10;
+}
+
+/* Glow segment that follows cursor */
+.glow-segment {
+  position: absolute;
+  width: 100px; /* Length of the glow segment */
+  height: 3px; /* Thickness of the glow */
+  background: linear-gradient(
+    90deg,
+    rgba(59, 130, 246, 0),
+    rgba(16, 185, 129, 0.8),
+    rgba(245, 158, 11, 1),
+    rgba(16, 185, 129, 0.8),
+    rgba(59, 130, 246, 0)
+  );
+  filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.1s ease-out;
+  border-radius: 3px;
+  transform-origin: center;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+/* Show the glow when container is in nearby state */
+.contact-container.nearby .glow-segment {
+  opacity: 1;
+}
+
+/* Remove old glow effect classes */
+.glow-svg,
+.glow-path {
+  display: none;
+}
+
+/* Corner glows - pseudo-elements to help with corner transitions */
+.contact-container.nearby::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.05;
+  box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.7);
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: more) {
+  .glow-segment {
+    filter: blur(1.5px);
+    background: linear-gradient(
+      90deg,
+      rgba(59, 130, 246, 0.3),
+      rgba(16, 185, 129, 0.9),
+      rgba(245, 158, 11, 1),
+      rgba(16, 185, 129, 0.9),
+      rgba(59, 130, 246, 0.3)
+    );
+  }
+} 

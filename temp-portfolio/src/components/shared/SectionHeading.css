@@ -1,0 +1,43 @@
+/* Section Heading Styles */
+.section-heading {
+  margin-bottom: 2rem;
+  width: 100%;
+  position: relative;
+}
+
+.section-heading span {
+  display: inline-block;
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #FFA500;
+  letter-spacing: 1px;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.section-heading span::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(to right, #f97316, #facc15);
+}
+
+/* Centered variant */
+.section-heading.centered {
+  text-align: center;
+}
+
+.section-heading.centered span::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 768px) {
+  .section-heading span {
+    font-size: 1.5rem;
+  }
+} 
