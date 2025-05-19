@@ -23,9 +23,9 @@ const About: React.FC = () => {
           <span className="text-secondary">WHO I AM?</span>
         </motion.h2>
         
-        <div className="relative mt-12">
+        <div className="relative mt-12 flex items-center">
           <motion.div 
-            className="relative z-10 w-full max-w-2xl"
+            className="relative z-10 w-full max-w-2xl flex-1"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -48,19 +48,16 @@ const About: React.FC = () => {
           </motion.div>
           
           <motion.div 
-            className="absolute bottom-0 right-0 z-0 w-3/5 max-w-sm"
+            className="z-0 flex-1"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.9 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            style={{ pointerEvents: 'none', transform: 'translateY(-45px)' }}
+            style={{ pointerEvents: 'none', transform: 'translate(100px, 0px)' }}
           >
             <img 
-              src="/tv_logo.png" 
-              alt="TV Logo" 
-              className="w-full"
-              style={{ 
-                filter: 'brightness(0) saturate(100%) invert(65%) sepia(100%) saturate(1500%) hue-rotate(360deg) brightness(105%) contrast(104%)' 
-              }}
+              src="/boat.png" 
+              alt="Photo of me" 
+              style={{ width: '300px', height: 'auto' }}
             />
           </motion.div>
         </div>

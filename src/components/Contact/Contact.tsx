@@ -30,7 +30,7 @@ const Contact: React.FC = () => {
         setResumeChecked(false);
         setSuccessMsg('Thank you! Your message has been sent.');
         if (resumeChecked) {
-          const newWindow = window.open('/vonHartitzsch_Trenton Resume.pdf', '_blank', 'noopener,noreferrer');
+          const newWindow = window.open('/vonHartitzsch_Trenton_Resume.pdf', '_blank', 'noopener,noreferrer');
           if (newWindow) {
             newWindow.blur();
             window.focus();
