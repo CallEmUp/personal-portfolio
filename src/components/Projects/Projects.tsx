@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import '../shared/SectionHeading.css';
+import React, { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import Phone3D from './Phone3D';
+
+type ProjectCategory = 'All' | 'Data Visualization' | 'Web Development' | 'ML / Data Science';
 
 interface ProjectItem {
   title: string;
@@ -9,538 +11,368 @@ interface ProjectItem {
   image: string;
   github: string;
   showGithubLink?: boolean;
+  category: Exclude<ProjectCategory, 'All'>;
 }
 
-const projectCardVariants = {
-  hidden: {
-    opacity: 0,
-    y: 75,
+const projectList: ProjectItem[] = [
+  {
+    title: 'Clinical Named Entity Recognition Platform',
+    description:
+      'System to turn raw medical documents into structured insights for clinical analytics. Streamlined parsing, BIO tagging, and tokenization; fine-tuned Bio_ClinicalBERT with layer-wise decay and adversarial training for stronger entity recognition.',
+    techList: ['Python', 'NLP', 'Hugging Face', 'Bio_ClinicalBERT'],
+    image: '/NER.png',
+    github: '#',
+    showGithubLink: false,
+    category: 'ML / Data Science',
   },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { 
-      duration: 0.5, 
-      ease: "easeInOut" 
-    },
+  {
+    title: 'Sentiment-Driven Quantitative Trading Strategy',
+    description:
+      'Quantitative strategy linking equity movements to commodities via sentiment analysis, correlation models, and ML signal generation. Multi-model pipeline with PostgreSQL for querying and benchmarking.',
+    techList: ['Python', 'Machine Learning', 'PostgreSQL', 'Sentiment Analysis'],
+    image: '/sentiment_analysis.png',
+    github: '#',
+    showGithubLink: false,
+    category: 'Data Visualization',
   },
-  exit: {
-    opacity: 0,
-    y: -75,
-    transition: { 
-      duration: 0.3, 
-      ease: "easeInOut" 
-    },
+  {
+    title: 'RentRoute',
+    description:
+      'Full-stack NYC rental finder by commute time and proximity to groceries, schools, and gyms. React, Flask, and TravelTime API for real-time search; ML-driven recommendations and Seaborn visualizations for housing trends.',
+    techList: ['React.js', 'Flask', 'Python', 'TravelTime API', 'Seaborn'],
+    image: '/nobg_rentroute.png',
+    github: 'https://github.com/CallEmUp/RentRoute',
+    showGithubLink: true,
+    category: 'Web Development',
   },
-};
+  {
+    title: 'Spotify Song Data Analysis',
+    description:
+      'Analysis of 20k+ Spotify tracks with Python, Pandas, and Scikit-Learn. Feature engineering and ML to uncover popularity drivers; automated preprocessing and visualizations for trend insights.',
+    techList: ['Python', 'Pandas', 'Scikit-Learn', 'Seaborn', 'Matplotlib'],
+    image: '/spotify.png',
+    github: 'https://github.com/CallEmUp/spotifySongAnalysis',
+    showGithubLink: true,
+    category: 'Data Visualization',
+  },
+  {
+    title: 'Personal Portfolio',
+    description:
+      'This site, a portfolio built with React to showcase projects and experience. Focus on clear layout and smooth interactions.',
+    techList: ['React', 'TypeScript', 'CSS', 'Framer Motion'],
+    image: '/personal_portfolio.png',
+    github: 'https://github.com/CallEmUp/personal-portfolio',
+    showGithubLink: true,
+    category: 'Web Development',
+  },
+  {
+    title: 'Django & React Notes App',
+    description:
+      'Notes app with a Django backend and React frontend. RESTful API for CRUD operations and a simple, responsive UI.',
+    techList: ['React', 'Django', 'Python', 'REST API'],
+    image: '/notes_app.png',
+    github: 'https://github.com/CallEmUp/djangoReactNotes',
+    showGithubLink: true,
+    category: 'Web Development',
+  },
+];
+
+const FILTERS: { label: ProjectCategory }[] = [
+  { label: 'All' },
+  { label: 'Data Visualization' },
+  { label: 'Web Development' },
+  { label: 'ML / Data Science' },
+];
+
+const GithubIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+  >
+    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+  </svg>
+);
+
+interface CardLayout {
+  gridColumn: string;
+  gridRow: string;
+  isLarge: boolean;
+}
+
+function computeGridLayout(count: number): CardLayout[] {
+  const layout: CardLayout[] = [];
+  let idx = 0;
+  let row = 1;
+  let phase = 0;
+
+  while (idx < count) {
+    if (phase === 0 || phase === 2) {
+      for (let c = 0; c < 3 && idx < count; c++) {
+        layout.push({ gridColumn: `${c + 1}`, gridRow: `${row} / span 2`, isLarge: false });
+        idx++;
+      }
+      row += 2;
+    } else {
+      const largeCol = phase === 1 ? '1 / span 2' : '2 / span 2';
+      const smallCol = phase === 1 ? '3' : '1';
+      const start = row;
+
+      if (idx < count) { layout.push({ gridColumn: largeCol, gridRow: `${start} / span 3`, isLarge: true }); idx++; }
+      if (idx < count) { layout.push({ gridColumn: largeCol, gridRow: `${start + 3} / span 3`, isLarge: true }); idx++; }
+      if (idx < count) { layout.push({ gridColumn: smallCol, gridRow: `${start} / span 2`, isLarge: false }); idx++; }
+      if (idx < count) { layout.push({ gridColumn: smallCol, gridRow: `${start + 2} / span 2`, isLarge: false }); idx++; }
+      if (idx < count) { layout.push({ gridColumn: smallCol, gridRow: `${start + 4} / span 2`, isLarge: false }); idx++; }
+
+      row = start + 6;
+    }
+    phase = (phase + 1) % 4;
+  }
+  return layout;
+}
 
 const Projects: React.FC = () => {
-  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
-  const [isProjectsVisible, setIsProjectsVisible] = useState(false);
-  const [isScrollingActive, setIsScrollingActive] = useState(false);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [isHeaderSticky, setIsHeaderSticky] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<ProjectCategory>('All');
 
-  const [headerProps, setHeaderProps] = useState({
-    position: 'sticky' as 'sticky' | 'absolute' | 'static',
-    top: '80px',
-    transform: 'translateY(0)',
-    opacity: 1,
-    zIndex: 10
-  });
+  const filteredProjects = useMemo(() => {
+    if (activeFilter === 'All') return projectList;
+    return projectList.filter((p) => p.category === activeFilter);
+  }, [activeFilter]);
 
-  const projectsRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLHeadingElement>(null);
-  const lastHeaderPosition = useRef(0);
-  const projectCardRef = useRef<HTMLDivElement>(null);
-  const lastProjectRef = useRef<HTMLDivElement>(null);
+  const gridLayout = useMemo(() => computeGridLayout(filteredProjects.length), [filteredProjects.length]);
 
-  const projectList: ProjectItem[] = [
-    {
-      title: "Clinical Named Entity Recognition Platform",
-      description: "Built a scalable clinical NER pipeline on MIMIC-IV, automating CSV ingestion, hierarchical BIO-tag annotation, and optimized tokenization; fine-tuned Bio_ClinicalBERT with layer-wise learning rate decay and adversarial domain adaptation to drive significant entity-level F1 gains.",
-      techList: ["Python", "NLP", "Hugging Face", "Transformers"],
-      image: "/NER.png",
-      github: "#",
-      showGithubLink: false
-    },
-    {
-      title: "Sentiment-Driven Quantitative Trading Strategy",
-      description: "Developed a quantitative trading strategy that forecasts equity–commodity movements via a multi‑model sentiment analysis pipeline, correlation modeling, and machine‑learning signal generation; integrated all outputs into PostgreSQL for efficient querying and benchmarked performance against traditional strategies.",
-      techList: ["Python", "Machine Learning", "PostgreSQL", "Sentiment Analysis"],
-      image: "/sentiment_analysis.png",
-      github: "#",
-      showGithubLink: false
-    },
-    {
-      title: "RentRoute",
-      description: "Find your ideal NYC apartment based on commute time with RentRoute. My app uses real-time data to match you with rentals that fit your preferred travel time and transportation mode, making apartment hunting more efficient. Say goodbye to long commutes and hello to a home that works for your life. RentRoute—your next home, just a ride away.",
-      techList: ["Python", "Folium", "Machine Learning", "Seaborn", "React.js", "Flask"],
-      image: "/nobg_rentroute.png",
-      github: "https://github.com/CallEmUp/RentRoute",
-      showGithubLink: true
-    },
-    {
-      title: "Spotify Song Data Analysis",
-      description: "Source code and full analysis on Spotify songs to provide deeper insight into what makes songs popular in an attempt to help up and coming artists. Applied feature engineering and model evaluation techniques to improve prediction accuracy and uncover factors driving music trends.",
-      techList: ["Python", "Pandas", "Numpy", "Scikit-Learn", "Machine Learning"],
-      image: "/spotify.png",
-      github: "https://github.com/CallEmUp/spotifySongAnalysis",
-      showGithubLink: true
-    },
-    {
-      title: "Personal Portfolio",
-      description: "Source code of my current portfolio web page. Developed a personal portfolio website highlighting strengths and projects as a developer.",
-      techList: ["React", "Node.JS", "CSS", "JavaScript"],
-      image: "/personal_portfolio.png",
-      github: "https://github.com/CallEmUp/personal-portfolio",
-      showGithubLink: true
-    },
-    {
-      title: "Django & React Notes App",
-      description: "Source code of my notes app made with Django and React, utilizing RESTful API that efficiently manages CRUD operations for notes.",
-      techList: ["React", "Django", "CSS", "HTML", "Python"],
-      image: "/notes_app.png",
-      github: "https://github.com/CallEmUp/djangoReactNotes",
-      showGithubLink: true
-    }
-  ];
-
-  const sectionHeight = projectList.length * 80 + 30;
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!sectionRef.current || !projectsRef.current || !headerRef.current || !contentRef.current) return;
-
-      const sectionTop = sectionRef.current.offsetTop;
-      const sectionBottom = sectionTop + sectionRef.current.offsetHeight;
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-
-      if (scrollPosition + windowHeight > sectionTop && scrollPosition < sectionBottom) {
-        setIsProjectsVisible(true);
-
-        const scrollIntoSection = scrollPosition - sectionTop + windowHeight / 2;
-        if (scrollIntoSection > 0) {
-          const projectHeight = 0.8 * windowHeight;
-          const newIndex = Math.min(
-            Math.floor(scrollIntoSection / projectHeight),
-            projectList.length - 1
-          );
-
-          if (newIndex !== activeProjectIndex) {
-            setActiveProjectIndex(newIndex);
-            setIsScrollingActive(true);
-          }
-
-          if (newIndex === projectList.length - 1) {
-            const headerRect = headerRef.current.getBoundingClientRect();
-
-            const currentHeaderPosition = headerRect.top + window.scrollY;
-
-            if (activeProjectIndex !== projectList.length - 1) {
-              lastHeaderPosition.current = currentHeaderPosition;
-              console.log('Captured header position:', lastHeaderPosition.current);
-            }
-
-            setHeaderProps({
-              position: 'absolute',
-              top: `${lastHeaderPosition.current}px`,
-              transform: 'none',
-              opacity: 1,
-              zIndex: 10
-            });
-
-            console.log('Using header position:', lastHeaderPosition.current);
-          } else {
-            setHeaderProps({
-              position: 'sticky',
-              top: '80px',
-              transform: 'translateY(0)',
-              opacity: 1,
-              zIndex: 10
-            });
-
-            if (headerRef.current) {
-              const headerRect = headerRef.current.getBoundingClientRect();
-              lastHeaderPosition.current = headerRect.top + window.scrollY;
-            }
-          }
-        }
-      } else {
-        setIsProjectsVisible(false);
-        setIsScrollingActive(false);
-
-        if (scrollPosition < sectionTop) {
-          setHeaderProps({
-            position: 'sticky',
-            top: '80px',
-            transform: 'translateY(0)',
-            opacity: 1,
-            zIndex: 10
-          });
-        } else {
-          setHeaderProps({
-            position: 'absolute',
-            top: `${sectionBottom}px`,
-            transform: 'translateY(-100%)',
-            opacity: 0,
-            zIndex: 10
-          });
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeProjectIndex, projectList.length]);
-
-  useEffect(() => {
-    if (!projectCardRef.current) return;
-    const observer = new window.IntersectionObserver(
-      ([entry]) => {
-        setIsHeaderVisible(!entry.isIntersecting);
-        setIsHeaderSticky(!entry.isIntersecting);
-      },
-      {
-        threshold: 0.5,
-      }
-    );
-    observer.observe(projectCardRef.current);
-    return () => observer.disconnect();
-  }, [activeProjectIndex]);
-
-  const isSpotifyProject = (i: number) =>
-    projectList[i].title === "Spotify Song Data Analysis";
+  const counts = useMemo(() => {
+    const all = projectList.length;
+    const dataViz = projectList.filter((p) => p.category === 'Data Visualization').length;
+    const webDev = projectList.filter((p) => p.category === 'Web Development').length;
+    const ml = projectList.filter((p) => p.category === 'ML / Data Science').length;
+    return { All: all, 'Data Visualization': dataViz, 'Web Development': webDev, 'ML / Data Science': ml };
+  }, []);
 
   return (
-    <section
-      id="projects"
-      ref={sectionRef}
-      className="Section-sc-1uxj9e4-0 featured__StyledContainer-m38bt7-0 EYdbS"
-      style={{
-        margin: '0 auto',
-        padding: '60px 0',
-        maxWidth: '1000px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        minHeight: `${sectionHeight}vh`,
-        position: 'relative'
-      }}
-    >
-      <motion.h2
-        ref={headerRef}
-        className="section-heading centered"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: isHeaderVisible ? 1 : 0, x: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          position: isHeaderSticky ? 'sticky' : 'static',
-          top: isHeaderSticky ? '80px' : undefined,
-          zIndex: 10,
-          width: '100%',
-          textAlign: 'center',
-          marginBottom: 0,
-          background: 'inherit'
-        }}
-      >
-        <span className="text-secondary">PROJECTS</span>
-      </motion.h2>
+    <section id="projects" className="pt-32 pb-16 px-6 overflow-x-clip">
+      <div className="max-w-[1100px] mx-auto">
 
-      <div
-        ref={projectsRef}
-        style={{
-          height: '85vh',
-          width: '100%',
-          position: 'sticky',
-          top: '100px',
-          overflow: 'hidden',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: headerProps.position === 'absolute' ? '20px' : '-5px',
-          transition: 'margin-top 0.3s ease'
-        }}
-      >
-        <div
-          ref={contentRef}
-          style={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: '900px',
-            margin: '0 auto'
-          }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeProjectIndex}
-              variants={projectCardVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              style={{
-                width: '100%',
-                paddingTop: 0
-              }}
-            >
-              {(() => {
-                const project = projectList[activeProjectIndex];
-                const isOdd = activeProjectIndex % 2 !== 0;
-                const isLast = activeProjectIndex === projectList.length - 1;
-                return (
-                  <motion.div
-                    ref={isLast ? lastProjectRef : projectCardRef}
-                    className="featured__StyledProject-m38bt7-9 bBGfSj"
-                    style={{
-                      display: 'grid',
-                      gap: '10px',
-                      gridTemplateColumns: 'repeat(12, 1fr)',
-                      alignItems: 'center',
-                      visibility: 'visible',
-                      opacity: 1,
-                      paddingTop: 0
-                    }}
-                  >
-                    <div
-                      className="featured__StyledContent-m38bt7-1 cfqDAG"
-                      style={{
-                        position: 'relative',
-                        gridColumn: isOdd ? '7 / -1' : '1 / 7',
-                        gridRow: '1 / -1',
-                        textAlign: isOdd ? 'right' : 'left',
-                        zIndex: 2
-                      }}
-                    >
-                      <div
-                        className="featured__StyledLabel-m38bt7-2 gRbEGM"
-                        style={{
-                          fontSize: '13px',
-                          fontWeight: 400,
-                          color: '#FFA500',
-                          fontFamily: 'SF Mono, Fira Code, Fira Mono, Roboto Mono, monospace',
-                          margin: 0,
-                          marginBottom: '10px'
-                        }}
-                      >
-                        Featured Project
-                      </div>
+        {/* ─── Featured Section: fills viewport on mobile ─── */}
+        <div className="grid md:grid-cols-2 gap-4 md:gap-0 items-start mb-8 md:mb-[-102px]
+                        min-h-[calc(100vh-10rem)] md:min-h-0 flex-col justify-between">
 
-                      <h4
-                        className="featured__StyledProjectName-m38bt7-3 ffQPbE"
-                        style={{
-                          fontSize: '28px',
-                          margin: 0,
-                          marginBottom: '20px',
-                          color: '#f0f0f0'
-                        }}
-                      >
-                        {project.title}
-                      </h4>
+          {/* Left half: heading + description */}
+          <div className="flex flex-col justify-between md:min-h-[620px] md:pr-12">
+            <div>
+              <motion.h2
+                className="font-black text-[#e0e0e0] leading-[0.92] mb-10"
+                style={{ fontSize: 'clamp(3.5rem, 8vw, 7rem)' }}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                My<br />
+                <span className="text-[#FFA500]">Work</span>
+              </motion.h2>
 
-                      <div
-                        className="featured__StyledDescription-m38bt7-4 dcVFes"
-                        style={{
-                          boxShadow: '0 10px 30px -15px rgba(2, 12, 27, 0.7)',
-                          transition: '0.25s cubic-bezier(0.645, 0.045, 0.355, 1)',
-                          position: 'relative',
-                          zIndex: 2,
-                          padding: '25px',
-                          backgroundColor: '#272727',
-                          color: '#c0c0c0',
-                          fontSize: '18px',
-                          borderRadius: '3px'
-                        }}
-                      >
-                        <p style={{ margin: 0 }}>{project.description}</p>
-                      </div>
-
-                      <ul
-                        className="featured__StyledTechList-m38bt7-5 gAthGn"
-                        style={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          position: 'relative',
-                          zIndex: 2,
-                          margin: '25px 0 10px',
-                          padding: 0,
-                          listStyle: 'none',
-                          justifyContent: isOdd ? 'flex-end' : 'flex-start'
-                        }}
-                      >
-                        {project.techList.map((tech, i) => (
-                          <li
-                            key={i}
-                            style={{
-                              fontFamily: 'SF Mono, Fira Code, Fira Mono, Roboto Mono, monospace',
-                              fontSize: '13px',
-                              color: '#FFA500',
-                              marginRight: isOdd ? 0 : '20px',
-                              marginLeft: isOdd ? '20px' : 0,
-                              whiteSpace: 'nowrap'
-                            }}
-                          >
-                            {tech}
-                          </li>
-                        ))}
-                      </ul>
-
-                      {project.showGithubLink && (
-                        <div
-                          className="featured__StyledLinkWrapper-m38bt7-6 iAXaXC"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            position: 'relative',
-                            marginTop: '10px',
-                            justifyContent: isOdd ? 'flex-end' : 'flex-start'
-                          }}
-                        >
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="nofollow noopener noreferrer"
-                            aria-label="GitHub Link"
-                            style={{
-                              padding: '10px',
-                              color: '#c0c0c0',
-                              transition: 'all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1)',
-                              marginRight: isOdd ? 0 : '10px',
-                              marginLeft: isOdd ? '10px' : 0
-                            }}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              role="img"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              width="22"
-                              height="22"
-                            >
-                              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                            </svg>
-                          </a>
-                        </div>
-                      )}
-                    </div>
-
-                    <div
-                      className="featured__StyledImgContainer-m38bt7-8 elimof"
-                      style={{
-                        gridColumn: isOdd ? '1 / 8' : '6 / -1',
-                        gridRow: '1 / -1',
-                        position: 'relative',
-                        zIndex: 1,
-                        height: '100%',
-                        borderRadius: '2px',
-                        marginRight: isOdd ? 0 : '-10px',
-                        marginLeft: isOdd ? '-10px' : 0,
-                        transition: 'all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1)'
-                      }}
-                    >
-                      <div
-                        className="featured__StyledFeaturedImg-m38bt7-7 jMpFlQ gatsby-image-wrapper"
-                        style={{
-                          position: 'relative',
-                          overflow: 'hidden',
-                          height: '100%',
-                          width: '100%',
-                          verticalAlign: 'middle'
-                        }}
-                      >
-                        <div style={{ width: '100%', paddingBottom: '56%' }} />
-                        <img
-                          aria-hidden="true"
-                          src={project.image}
-                          alt={project.title}
-                          style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: isSpotifyProject(activeProjectIndex) ? '86%' : '100%',
-                            objectFit: 'contain',
-                            objectPosition: isSpotifyProject(activeProjectIndex) ? 'center top' : 'center center',
-                            opacity: 1,
-                            transition: 'opacity 500ms ease 0s',
-                            filter: 'brightness(100%)',
-                            borderRadius: '2px',
-                            mixBlendMode: 'normal',
-                            backgroundColor: '#272727'
-                          }}
-                        />
-                        <picture>
-                          <img
-                            width="500"
-                            sizes="(max-width: 700px) 100vw, 700px"
-                            decoding="async"
-                            src={project.image}
-                            alt=""
-                            style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: isSpotifyProject(activeProjectIndex) ? '86%' : '100%',
-                              objectFit: 'contain',
-                              objectPosition: isSpotifyProject(activeProjectIndex) ? 'center top' : 'center center',
-                              opacity: 0,
-                              transition: 'opacity 500ms ease 0s',
-                              transitionDelay: '500ms'
-                            }}
-                          />
-                        </picture>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })()}
-            </motion.div>
-          </AnimatePresence>
-
-          {isScrollingActive && isProjectsVisible && (
-            <div
-              style={{
-                position: 'absolute',
-                right: '-30px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-                zIndex: 20
-              }}
-            >
-              {projectList.map((_, idx) => (
-                <button
-                  key={idx}
-                  aria-label={`Navigate to project ${idx + 1}`}
-                  onClick={() => {
-                    if (!sectionRef.current) return;
-                    const sectTop = sectionRef.current.offsetTop;
-                    const projOff = idx * (0.8 * window.innerHeight) + 60;
-                    window.scrollTo({ top: sectTop + projOff, behavior: 'smooth' });
-                  }}
-                  style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    background: activeProjectIndex === idx ? '#FFA500' : '#555',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0
-                  }}
-                />
-              ))}
+              <motion.p
+                className="text-[#999] text-sm leading-relaxed max-w-[380px]"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+              >
+                Built production platforms handling real payments, reservations,
+                and mobile apps using React and TypeScript.
+                From full-stack web to ML pipelines and data-driven
+                trading strategies, I ship things that work.
+              </motion.p>
             </div>
-          )}
+          </div>
+
+          {/* Right half: featured info + phone */}
+          <div className="relative md:min-h-[620px]">
+            {/* Phone - on mobile it shows centered above featured text */}
+            <motion.div
+              className="md:absolute md:top-[-50px] md:right-[20px] flex justify-center order-first md:order-none"
+              style={{ zIndex: 1 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+            >
+              <Phone3D />
+            </motion.div>
+
+            {/* Featured project card */}
+            <motion.div
+              className="relative z-10 md:mt-auto md:pt-[130px] flex flex-col items-center md:items-start text-center md:text-left mt-6 md:mt-0"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <img
+                src="https://tamalsen.dev/wp-content/uploads/2021/07/right-side-arrow.png"
+                alt=""
+                width={512}
+                height={512}
+                decoding="async"
+                className="w-20 h-20 md:w-60 md:h-24 mb-6 hidden md:block flex-shrink-0 object-contain"
+                style={{
+                  filter: 'sepia(1) saturate(4) hue-rotate(-27deg) brightness(0.9)',
+                }}
+              />
+
+              <p className="text-[#FFA500] text-sm font-medium mb-2">
+                Featured Project
+              </p>
+              <h3 className="text-3xl md:text-4xl font-bold text-[#e0e0e0] mb-3">
+                BookTheBars
+              </h3>
+              <a
+                href="https://www.bookthebars.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-[#FFA500] text-black px-8 py-3.5 rounded-lg text-sm font-semibold
+                           hover:bg-[#e59400] transition-colors duration-300 no-underline"
+              >
+                View Project
+              </a>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* ─── Filter by ─── */}
+        <div className="portfolio-sorting text-left mb-8 mt-16 md:mt-0">
+          <ul className="list-none flex flex-wrap items-baseline gap-x-1 gap-y-2 text-sm p-0 m-0">
+            <li className="text-[#999] mr-1">Filter by</li>
+            {FILTERS.map(({ label }, idx) => {
+              const count = counts[label];
+              const isActive = activeFilter === label;
+              return (
+                <li key={label} className="inline flex items-baseline gap-x-1">
+                  {idx > 0 && <span className="text-[#555]">/</span>}
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter(label)}
+                    className={`${isActive ? 'active text-[#FFA500]' : 'text-[#999] hover:text-[#e0e0e0]'} font-medium transition-colors bg-transparent border-0 p-0 cursor-pointer`}
+                  >
+                    <span className="name">{label}</span>{' '}
+                    <span className="num text-[#666]">{String(count).padStart(2, '0')}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/* ─── Portfolio grid: Tetris on desktop, single-col on mobile ─── */}
+        <div
+          className="hidden md:grid grid-cols-3 gap-4"
+          style={{ gridAutoRows: '150px' }}
+        >
+          {filteredProjects.map((project, i) => {
+            const { gridColumn, gridRow, isLarge } = gridLayout[i];
+            const projectHref = project.github !== '#' ? project.github : '#';
+            return (
+              <motion.div
+                key={project.title}
+                className="rounded-lg overflow-hidden group bg-[#1a1a1a] border border-[#2a2a2a]
+                           hover:border-[#FFA500]/30 hover:-translate-y-0.5 transition-all duration-300
+                           flex flex-col min-h-0"
+                style={{ gridColumn, gridRow }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.05 * i }}
+              >
+                <div className="portfolio-item-image relative flex-1 min-h-0 bg-[#0d0d0d]">
+                  <a href={projectHref} className="block w-full h-full" target={project.github !== '#' ? '_blank' : undefined} rel={project.github !== '#' ? 'noopener noreferrer' : undefined}>
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-500"
+                      decoding="async"
+                    />
+                  </a>
+                  {project.showGithubLink && (
+                    <a
+                      href={project.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-2 right-2 text-[#999] hover:text-[#FFA500] transition-colors opacity-0 group-hover:opacity-100 duration-300 p-1.5 rounded bg-[#1a1a1a]/80"
+                      aria-label="GitHub"
+                    >
+                      <GithubIcon />
+                    </a>
+                  )}
+                </div>
+                <div className={`portfolio-item-details text-left px-3 bg-[#141414] flex-shrink-0 ${isLarge ? 'py-3' : 'py-2'}`}>
+                  <h3 className="portfolio-item-headline font-bold text-white truncate text-xs sm:text-sm" title={project.title}>
+                    {project.title}
+                  </h3>
+                  <div className="category-holder mt-0.5">
+                    <span className="category text-[#888] text-[10px] sm:text-xs">{project.category}</span>
+                  </div>
+                  <div className="show-project mt-2">
+                    <a href={projectHref} className="show-project-link text-[#FFA500] hover:underline text-xs font-medium" target={project.github !== '#' ? '_blank' : undefined} rel={project.github !== '#' ? 'noopener noreferrer' : undefined}>
+                      Show project
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* ─── Mobile single-column grid ─── */}
+        <div className="md:hidden flex flex-col gap-5">
+          {filteredProjects.map((project, i) => {
+            const projectHref = project.github !== '#' ? project.github : '#';
+            return (
+              <motion.div
+                key={project.title}
+                className="rounded-lg overflow-hidden group bg-[#1a1a1a] border border-[#2a2a2a]
+                           hover:border-[#FFA500]/30 transition-all duration-300 flex flex-col"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.05 * i }}
+              >
+                <div className="relative w-full aspect-[16/10] bg-[#0d0d0d]">
+                  <a href={projectHref} className="block w-full h-full" target={project.github !== '#' ? '_blank' : undefined} rel={project.github !== '#' ? 'noopener noreferrer' : undefined}>
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-contain p-3"
+                      decoding="async"
+                    />
+                  </a>
+                  {project.showGithubLink && (
+                    <a
+                      href={project.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-2 right-2 text-[#999] hover:text-[#FFA500] transition-colors p-1.5 rounded bg-[#1a1a1a]/80"
+                      aria-label="GitHub"
+                    >
+                      <GithubIcon />
+                    </a>
+                  )}
+                </div>
+                <div className="text-left px-4 py-3 bg-[#141414]">
+                  <h3 className="font-bold text-white text-sm" title={project.title}>
+                    {project.title}
+                  </h3>
+                  <span className="text-[#888] text-xs mt-0.5 block">{project.category}</span>
+                  <a href={projectHref} className="text-[#FFA500] hover:underline text-xs font-medium mt-2 inline-block" target={project.github !== '#' ? '_blank' : undefined} rel={project.github !== '#' ? 'noopener noreferrer' : undefined}>
+                    Show project
+                  </a>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

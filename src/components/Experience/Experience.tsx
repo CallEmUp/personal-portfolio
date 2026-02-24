@@ -1,280 +1,182 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import '../shared/SectionHeading.css';
-
-// Add CSS for hover effect
-const tabButtonHoverStyle = `
-  .tab-button {
-    transition: color 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
-  }
-  .tab-button:hover {
-    color: #FFA500 !important;
-  }
-`;
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ExperienceItem {
   company: string;
   companyLink: string;
   title: string;
   date: string;
-  description: string[];
+  location: string;
+  description: string;
+  tech: string[];
+  logo?: string;
+  logoBg?: string;
 }
 
+const experienceItems: ExperienceItem[] = [
+  {
+    company: 'Book The Bars LLC',
+    companyLink: 'https://www.bookthebars.com/',
+    title: 'Software Engineer',
+    date: 'August 2024 - Present',
+    location: 'New York, NY',
+    description:
+      'Building and launching a reservation booking platform with venue subscriptions and payment integration. Shipping full-stack features in React/TypeScript, integrating end-to-end payment flows, and extending the platform to native iOS and Android.',
+    tech: ['React', 'TypeScript', 'Node.js', 'iOS', 'Android'],
+    logo: '/btb-logo.png',
+    logoBg: '#ffffff',
+  },
+  {
+    company: 'Flite City Corporation',
+    companyLink: 'https://www.flite.city/',
+    title: 'Data Science Intern',
+    date: 'May 2025 - August 2025',
+    location: 'New York, NY',
+    description:
+      'Developing an AI assistant for an event planning and ticketing platform. Fine-tuning LLMs with LoRA, building a RAG agent with LangChain, LangGraph, and Redis, and deploying real-time analytics dashboards in React and Plotly.',
+    tech: ['LangChain', 'LangGraph', 'Redis', 'React', 'Plotly'],
+    logo: '/flite-logo.png',
+  },
+  {
+    company: 'LD Kerns Contractors',
+    companyLink: 'https://ldkerns.com/',
+    title: 'Software Engineering Intern',
+    date: 'June 2024 - May 2025',
+    location: 'Tulsa, OK',
+    description:
+      'Redesigning internal sites, migrating the company website from WordPress to Flask + React, automating PostgreSQL backup/restore, and building Python tooling for server health checks.',
+    tech: ['Flask', 'React', 'PostgreSQL', 'Python'],
+    logo: '/ldk-logo.png',
+  },
+];
+
 const Experience: React.FC = () => {
-  const [activeTabId, setActiveTabId] = useState(0);
-  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  const highlighterRef = useRef<HTMLSpanElement | null>(null);
-  const sectionRef = useRef<HTMLElement>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const experienceItems: ExperienceItem[] = [
-    {
-      company: "L.D. Kerns Contractors",
-      companyLink: "https://ldkerns.com/",
-      title: "Technology Intern",
-      date: "June 2024 - Current",
-      description: [
-        "Supported and enhanced L.D. Kerns Contractors digital infrastructure by implementing new technologies",
-        "Collaborated on web development projects within the construction industry",
-        "Gained experience in system administration and project management",
-        "Technologies: CSS, Flask, PostgreSQL, Python"
-      ]
-    },
-    {
-      company: "Freelance",
-      companyLink: "#",
-      title: "Web Developer",
-      date: "2022 - Current",
-      description: [
-        "Designed, implemented, and monitored web pages, plugins, and functionality for small businesses",
-        "Focused on continuous improvement of client websites and applications",
-        "Provided technical support and maintenance for client websites",
-        "Technologies: HTML, JavaScript, React"
-      ]
-    }
-  ];
-
-  // Handle scroll adjustment
-  useEffect(() => {
-    // Function to handle hash changes
-    const handleHashChange = () => {
-      if (window.location.hash === '#experience' && sectionRef.current) {
-        setTimeout(() => {
-          const currentScrollPosition = window.scrollY;
-          window.scrollTo({
-            top: currentScrollPosition + 70, // Scroll 70px more
-            behavior: 'smooth'
-          });
-        }, 100); // Small delay to ensure the browser's default scroll completes
-      }
-    };
-
-    // Check hash on mount
-    if (window.location.hash === '#experience') {
-      handleHashChange();
-    }
-
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  // Update highlight position on tab change
-  useEffect(() => {
-    if (tabsRef.current.length === 0 || !highlighterRef.current) return;
-    
-    const activeTab = tabsRef.current[activeTabId];
-    if (!activeTab) return;
-    
-    const { top, height } = activeTab.getBoundingClientRect();
-    const tabsContainer = activeTab.parentElement?.parentElement;
-    if (!tabsContainer) return;
-    
-    const { top: containerTop } = tabsContainer.getBoundingClientRect();
-    const offset = top - containerTop;
-
-    // Set vertical position for desktop
-    highlighterRef.current.style.transform = `translateY(${offset}px)`;
-    highlighterRef.current.style.height = `${height}px`;
-  }, [activeTabId]);
-
-  const sectionStyles: React.CSSProperties = {
-    margin: '0 auto',
-    padding: '90px 0 150px 0',
-    position: 'relative',
-    maxWidth: '900px',
-    visibility: 'visible',
-    opacity: 1,
-    transform: 'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)',
-    transition: 'all, opacity 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0.2s, transform 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0.2s',
-    backgroundColor: '#272727',
-    scrollMarginTop: '20px'
-  };
-
-  const tabListStyles: React.CSSProperties = {
-    display: 'block',
-    position: 'relative',
-    width: 'max-content',
-    zIndex: 3,
-    padding: 0,
-    margin: 0,
-    listStyle: 'none'
-  };
-
-  const tabContentStyles: React.CSSProperties = {
-    position: 'relative',
-    width: '100%',
-    height: 'auto',
-    paddingTop: 0,
-    paddingLeft: '30px'
+  const toggle = (i: number) => {
+    setOpenIndex(openIndex === i ? null : i);
   };
 
   return (
-    <>
-      {/* Add style tag for hover effect */}
-      <style>{tabButtonHoverStyle}</style>
-      <section 
-        id="experience" 
-        ref={sectionRef}
-        style={sectionStyles}
-        className="erhpWX"
-        data-sr-id="2"
-      >
-        <motion.h2 
-          className="section-heading"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
+    <section id="experience" className="pt-12 pb-28 px-6">
+      <div className="max-w-[800px] mx-auto text-center">
+        <motion.h2
+          className="font-black text-[#e0e0e0] leading-[0.92] mb-16"
+          style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)' }}
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
         >
-          <span className="text-secondary">WHERE I'VE WORKED</span>
+          Professional<br />Experience
         </motion.h2>
 
-        <div className="dtPuYg jobs__StyledTabs-sc-1yvr741-1" style={{ display: 'flex', alignItems: 'flex-start' }}>
-          {/* Tab list */}
-          <ul 
-            role="tablist" 
-            aria-label="Job tabs" 
-            className="fHOvBu jobs__StyledTabList-sc-1yvr741-2"
-            style={{...tabListStyles, width: '180px'}}
-          >
-            {experienceItems.map((item, i) => (
-              <li key={i} className="relative">
-                <button
-                  id={`tab-${i}`}
-                  role="tab"
-                  aria-selected={activeTabId === i}
-                  aria-controls={`panel-${i}`}
-                  tabIndex={activeTabId === i ? 0 : -1}
-                  className={`jobs__StyledTabButton-sc-1yvr741-3 ${activeTabId === i ? 'jpEpFH' : 'jwbHuJ'} tab-button`}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '100%',
-                    height: '48px',
-                    padding: '43px 25px 2px',
-                    border: 'none',
-                    background: 'transparent',
-                    color: activeTabId === i ? '#FFA500' : '#c0c0c0',
-                    fontFamily: 'inherit',
-                    fontSize: '15px',
-                    textAlign: 'left',
-                    whiteSpace: 'nowrap',
-                    cursor: 'pointer',
-                    transition: 'all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1)'
-                  }}
-                  onClick={() => setActiveTabId(i)}
-                  ref={(el) => {
-                    tabsRef.current[i] = el;
-                  }}
-                >
-                  <span>{item.company}</span>
-                </button>
-              </li>
-            ))}
-            <span 
-              ref={highlighterRef}
-              className="bZkdqC jobs__StyledHighlight-sc-1yvr741-4"
-              style={{
-                display: 'block',
-                width: '3px',
-                height: '48px',
-                borderRadius: '4px',
-                backgroundColor: '#FFA500',
-                position: 'absolute',
-                left: 0,
-                top: 21,
-                zIndex: 10,
-                transform: 'translateY(0px)',
-                transition: 'transform 0.25s cubic-bezier(0.645, 0.045, 0.355, 1), width 0.25s cubic-bezier(0.645, 0.045, 0.355, 1)'
-              }}
-            />
-            {/* Grey background highlight that's always visible */}
-            <span 
-              className="jobs__StyledHighlightBackground"
-              style={{
-                display: 'block',
-                width: '3px',
-                height: experienceItems.length * 48 + 'px', // Dynamic height based on number of tabs
-                borderRadius: '4px',
-                backgroundColor: '#666666', // Tertiary grey color
-                position: 'absolute',
-                left: 0,
-                top: 21,
-                zIndex: 5
-              }}
-            />
-          </ul>
-
-          {/* Content panels */}
-          <div style={{ width: '100%' }}>
-            {experienceItems.map((item, i) => (
-              <div
-                id={`panel-${i}`}
+        <div className="space-y-3 text-left">
+          {experienceItems.map((item, i) => {
+            const isOpen = openIndex === i;
+            return (
+              <motion.div
                 key={i}
-                role="tabpanel"
-                aria-labelledby={`tab-${i}`}
-                tabIndex={activeTabId === i ? 0 : -1}
-                hidden={activeTabId !== i}
-                className="hGSFSy jobs__StyledTabContent-sc-1yvr741-5"
-                style={{...tabContentStyles, padding: '0 0 0 100px'}}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.08 * i }}
               >
-                <h4 className="igRrUO jobs__StyledJobTitle-sc-1yvr741-6" style={{ fontSize: '24px', color: '#f0f0f0', marginBottom: '8px' }}>
-                  <span>{item.title}</span>
-                  <span className="hsfhdF jobs__StyledCompany-sc-1yvr741-7" style={{ color: '#FFA500' }}>
-                    <span>&nbsp;@&nbsp;</span>
-                    <a 
-                      href={item.companyLink} 
-                      target="_blank" 
-                      rel="nofollow noopener noreferrer"
-                      style={{ 
-                        color: '#FFA500', 
-                        position: 'relative',
-                        textDecoration: 'none',
-                      }}
-                    >
-                      {item.company}
-                    </a>
+                <button
+                  type="button"
+                  onClick={() => toggle(i)}
+                  className="w-full flex items-center justify-between px-6 py-4 rounded-lg cursor-pointer
+                             transition-all duration-300 border-0 text-left group border-l-4 border-l-[#FFA500]"
+                  style={{ background: '#1a1a1a' }}
+                >
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg truncate pr-4">
+                    {item.title} @ {item.company}
                   </span>
-                </h4>
-                <h5 className="leiyZN jobs__StyledJobDetails-sc-1yvr741-8" style={{ fontSize: '14px', fontWeight: 'normal', letterSpacing: '0.05em', color: '#c0c0c0', marginBottom: '30px' }}>
-                  <span>{item.date}</span>
-                </h5>
-                <div>
-                  <ul style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: '18px' }}>
-                    {item.description.map((point, index) => (
-                      <li key={index} style={{ position: 'relative', paddingLeft: '35px', marginBottom: '15px' }}>
-                        <span style={{ color: '#FFA500', position: 'absolute', left: 0, top: '8px', fontSize: '16px' }}>▹</span>
-                        <span style={{ color: '#c0c0c0', fontSize: '16px' }}>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span className="text-[#999] font-medium text-sm hidden sm:block">
+                      {item.date}
+                    </span>
+                    <span className="text-[#FFA500] text-2xl font-light leading-none w-6 text-center select-none">
+                      {isOpen ? '\u2013' : '+'}
+                    </span>
+                  </div>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="bg-[#141414] rounded-b-lg px-6 py-6 mt-[-4px] border border-[#2a2a2a] border-t-0">
+                        <div className="flex gap-6">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-4 text-sm">
+                              <span className="flex items-center gap-1.5 text-[#bbb]">
+                                <svg className="w-4 h-4 text-[#FFA500]" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                </svg>
+                                {item.location}
+                              </span>
+                              {item.companyLink !== '#' && (
+                                <a
+                                  href={item.companyLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 text-[#bbb] hover:text-[#FFA500] transition-colors"
+                                >
+                                  <svg className="w-4 h-4 text-[#FFA500]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                  {item.companyLink.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                                </a>
+                              )}
+                            </div>
+
+                            <p className="text-[#ccc] text-sm leading-relaxed mb-5">
+                              {item.description}
+                            </p>
+
+                            <div className="flex flex-wrap gap-2">
+                              {item.tech.map((t, j) => (
+                                <span
+                                  key={j}
+                                  className="text-xs px-4 py-1.5 rounded-full border border-[#444] text-[#ddd] font-medium
+                                             bg-transparent hover:border-[#FFA500] transition-colors"
+                                >
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {item.logo && (
+                            <div
+                              className="hidden sm:flex items-center justify-center shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden"
+                              style={item.logoBg ? { backgroundColor: item.logoBg } : undefined}
+                            >
+                              <img
+                                src={item.logo}
+                                alt={`${item.company} logo`}
+                                className="w-full h-full object-contain p-1 opacity-90"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 };
 
-export default Experience; 
+export default Experience;

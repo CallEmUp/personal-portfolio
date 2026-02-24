@@ -1,217 +1,204 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import emailjs from '@emailjs/browser';
-import './Contact.css';
-import '../shared/SectionHeading.css';
 
-const fontFamily = "'Raleway', sans-serif";
+const socialLinks = [
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/trenton-vonhartitzsch/' },
+  { label: 'GitHub', href: 'https://github.com/CallEmUp' },
+  { label: 'Instagram', href: 'https://www.instagram.com/trentvonh_/' },
+];
 
-const SERVICE_ID = 'service_fhtbgsf';
-const TEMPLATE_ID = 'template_stl18cm';
-const USER_ID = 'Jv9iYhCn7VR-tVg7l';
+const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons';
+
+const techStack = [
+  { name: 'React', icon: `${DEVICON}/react/react-original.svg` },
+  { name: 'TypeScript', icon: `${DEVICON}/typescript/typescript-original.svg` },
+  { name: 'Python', icon: `${DEVICON}/python/python-original.svg` },
+  { name: 'Flask', icon: `${DEVICON}/flask/flask-original.svg` },
+  { name: 'Django', icon: `${DEVICON}/django/django-plain.svg` },
+  { name: 'Node.js', icon: `${DEVICON}/nodejs/nodejs-original.svg` },
+  { name: 'PostgreSQL', icon: `${DEVICON}/postgresql/postgresql-original.svg` },
+  { name: 'Redis', icon: `${DEVICON}/redis/redis-original.svg` },
+  { name: 'AWS', icon: `${DEVICON}/amazonwebservices/amazonwebservices-plain-wordmark.svg` },
+  { name: 'Docker', icon: `${DEVICON}/docker/docker-original.svg` },
+  { name: 'PyTorch', icon: `${DEVICON}/pytorch/pytorch-original.svg` },
+  { name: 'Pandas', icon: `${DEVICON}/pandas/pandas-original.svg` },
+  { name: 'Git', icon: `${DEVICON}/git/git-original.svg` },
+];
+
+const SnapshotCards: React.FC = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-min">
+
+    {/* Photo + quick intro (tall, spans 2 rows on sm+) */}
+    <motion.div
+      className="rounded-xl overflow-hidden flex flex-col sm:row-span-2 border border-[#FFA500]/15"
+      style={{ background: 'linear-gradient(135deg, #1f1708 0%, #1a1206 100%)' }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="relative w-full aspect-[4/3] bg-[#0d0a04] overflow-hidden">
+        <img
+          src="/hero_pic.png"
+          alt="Trenton vonHartitzsch"
+          className="w-full h-full object-contain object-bottom scale-[1.3] -translate-y-[-35px]"
+        />
+      </div>
+      <div className="p-5 flex flex-col flex-1">
+        <h3 className="text-[#f0e6d0] font-bold text-base mb-1">Trenton vonHartitzsch</h3>
+        <p className="text-[#FFA500] text-xs font-medium mb-3">Software Engineer</p>
+        <p className="text-[#a89070] text-xs leading-relaxed">
+          NYU CS & Data Science, Dec 2025. Julius Silver Scholar. 4-year varsity swim captain.
+        </p>
+      </div>
+    </motion.div>
+
+    {/* At a Glance */}
+    <motion.div
+      className="rounded-xl p-5 flex flex-col border border-[#FFA500]/10"
+      style={{ background: 'linear-gradient(135deg, #1c1410 0%, #181008 100%)' }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+    >
+      <h3 className="text-[#f0e6d0] font-bold text-sm mb-3">At a Glance</h3>
+      <div className="space-y-2.5 text-xs flex-1 flex flex-col justify-center">
+        <div className="flex justify-between">
+          <span className="text-[#8a7560]">Education</span>
+          <span className="text-[#d4c4a8] text-right">NYU, BA in CS & Data Science</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-[#8a7560]">GPA</span>
+          <span className="text-[#FFA500] font-semibold">3.74</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-[#8a7560]">Graduating</span>
+          <span className="text-[#d4c4a8]">December 2025</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-[#8a7560]">Location</span>
+          <span className="text-[#d4c4a8]">New York, NY</span>
+        </div>
+      </div>
+    </motion.div>
+
+    {/* Tech Stack */}
+    <motion.div
+      className="rounded-xl py-4 flex flex-col border border-[#6366f1]/10 overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #12121e 0%, #0e0e18 100%)' }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
+      <h3 className="text-[#d0d0f0] font-bold text-sm mb-3 px-5">Tech Stack</h3>
+      <div className="relative overflow-hidden flex-1 flex items-center">
+        <div
+          className="marquee-track flex w-max gap-6 px-2"
+          style={{ willChange: 'transform' }}
+        >
+          {[...techStack, ...techStack].map((tech, i) => (
+            <div
+              key={`${tech.name}-${i}`}
+              className="flex flex-col items-center gap-1.5 shrink-0 opacity-60 hover:opacity-100 transition-opacity cursor-default"
+              style={{ width: 48 }}
+            >
+              <img
+                src={tech.icon}
+                alt={tech.name}
+                className="w-7 h-7"
+                loading="lazy"
+              />
+              <span className="text-[9px] text-[#b0b0d0] whitespace-nowrap">{tech.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+
+  </div>
+);
+
+const ContactInfo: React.FC = () => (
+  <motion.div
+    className="flex flex-col justify-center"
+    initial={{ opacity: 0, x: -30 }}
+    whileInView={{ opacity: 1, x: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6 }}
+  >
+    <h2
+      className="font-black text-[#e0e0e0] leading-[0.92] mb-6"
+      style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)' }}
+    >
+      Let's work<br />
+      together
+    </h2>
+
+    <p className="text-[#999] text-sm leading-relaxed mb-8 max-w-sm">
+      Open to full-time roles, internships, and select freelance projects.
+      Have something in mind? Send me an email or reach out below.
+    </p>
+
+    <a
+      href="mailto:vonH.trent@gmail.com"
+      className="inline-block text-[#e0e0e0] font-mono text-sm underline underline-offset-4
+                 decoration-[#FFA500] hover:text-[#FFA500] transition-colors duration-300 mb-2 w-fit"
+    >
+      vonH.trent@gmail.com
+    </a>
+
+    <a
+      href="/vonHartitzsch_Trenton_Resume.pdf"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-block bg-[#FFA500] text-black px-6 py-2.5 rounded text-xs tracking-[0.15em] uppercase font-bold
+                 hover:bg-[#ffb733] transition-all duration-300 mt-4 mb-8 w-fit"
+    >
+      Download Resume
+    </a>
+
+    <div className="flex flex-col gap-2">
+      {socialLinks.map((link, i) => (
+        <motion.a
+          key={i}
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#999] hover:text-[#FFA500] transition-colors duration-300 text-sm w-fit"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.3, delay: 0.08 * i }}
+        >
+          {link.label}
+        </motion.a>
+      ))}
+    </div>
+  </motion.div>
+);
 
 const Contact: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [resumeChecked, setResumeChecked] = useState(false);
-  const [name, setName] = useState('');
-  const [message, setMessage] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-  const formRef = useRef<HTMLFormElement>(null);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current!, { publicKey: USER_ID })
-      .then(() => {
-        setEmail('');
-        setName('');
-        setMessage('');
-        setResumeChecked(false);
-        setSuccessMsg('Thank you! Your message has been sent.');
-        if (resumeChecked) {
-          const newWindow = window.open('/vonHartitzsch_Trenton_Resume.pdf', '_blank', 'noopener,noreferrer');
-          if (newWindow) {
-            newWindow.blur();
-            window.focus();
-          }
-        }
-        // Optionally clear the message after a few seconds
-        setTimeout(() => setSuccessMsg(''), 4000);
-      })
-      .catch(() => alert('Failed to send message.'));
-  };
-
   return (
-    <section id="contact" className="py-20 bg-[#121212] relative">
-      <div className="max-w-6xl mx-auto px-4">
-        <motion.h2
-          className="section-heading centered"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          style={{ fontFamily }}
-        >
-          <span className="text-secondary">CONTACT ME</span>
-        </motion.h2>
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="contact-container"
-        >
-          <div className="p-8 relative">
-            <div className="bg-[#222222] p-6 rounded-xl shadow-lg border border-[#333333] mb-8">
-              <form
-                ref={formRef}
-                style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', fontFamily }}
-                onSubmit={handleSubmit}
-              >
-                <div
-                  style={{
-                    marginBottom: '1.5rem',
-                    color: 'white',
-                    fontFamily,
-                    fontSize: '1.05rem',
-                    textAlign: 'center',
-                    marginTop: '-2rem',
-                  }}
-                >
-                  If you have any questions or concerns, please don't hesitate to contact me. Insert your email address below to get my resume sent to you. I look forward to hearing from you!
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label htmlFor="name" className="block text-gray-300 mb-2" style={{ fontFamily }}>Your Name:</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="from_name"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Your name"
-                    style={{
-                      backgroundColor: '#2a2a2a',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '0.5rem',
-                      color: 'white',
-                      border: 'none',
-                      outline: 'none',
-                      width: '100%',
-                      fontSize: '1rem',
-                      fontFamily
-                    }}
-                  />
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label htmlFor="email" className="block text-gray-300 mb-2" style={{ fontFamily }}>Your Email:</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="reply_to"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Your email"
-                    style={{
-                      backgroundColor: '#2a2a2a',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '0.5rem',
-                      color: 'white',
-                      border: 'none',
-                      outline: 'none',
-                      width: '100%',
-                      fontSize: '1rem',
-                      fontFamily
-                    }}
-                    required
-                  />
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label htmlFor="message" className="block text-gray-300 mb-2" style={{ fontFamily }}>Your Message:</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={5}
-                    value={message}
-                    onChange={e => setMessage(e.target.value)}
-                    placeholder="Your message"
-                    style={{
-                      backgroundColor: '#2a2a2a',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '0.5rem',
-                      color: 'white',
-                      border: 'none',
-                      outline: 'none',
-                      width: '100%',
-                      fontSize: '1rem',
-                      resize: 'none',
-                      fontFamily
-                    }}
-                  ></textarea>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    fontFamily,
-                    marginTop: '1rem',
-                    marginBottom: '2rem'
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    id="resume"
-                    checked={resumeChecked}
-                    onChange={e => setResumeChecked(e.target.checked)}
-                  />
-                  <input
-                    type="hidden"
-                    name="resume"
-                    value={resumeChecked ? "Yes" : "No"}
-                  />
-                  <label
-                    htmlFor="resume"
-                    style={{
-                      color: '#FFA500',
-                      fontSize: '1rem',
-                      cursor: 'pointer',
-                      fontFamily
-                    }}
-                  >
-                    Send me the resume
-                  </label>
-                </div>
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    className="send-button bg-gradient-to-r from-orange-500 to-yellow-400 text-black font-medium rounded-full uppercase tracking-wider text-sm transition-all hover:shadow-xl mx-auto"
-                    disabled={!email}
-                    style={{
-                      opacity: email ? 1 : 0.5,
-                      cursor: email ? 'pointer' : 'not-allowed',
-                      fontFamily,
-                      marginBottom: '-2rem'
-                    }}
-                  >
-                    <span>SEND MESSAGE</span>
-                  </button>
-                </div>
-                {successMsg && (
-                  <div
-                    style={{
-                      marginTop: '1rem',
-                      textAlign: 'center',
-                      color: '#FFA500',
-                      fontFamily
-                    }}
-                  >
-                    {successMsg}
-                  </div>
-                )}
-              </form>
-            </div>
-          </div>
-        </motion.div>
+    <section id="contact" className="pt-28 pb-6 px-6">
+      <div className="max-w-[1100px] mx-auto">
+
+        {/* Desktop layout: contact left, cards right */}
+        <div className="hidden lg:grid lg:grid-cols-[2fr_3fr] gap-16">
+          <ContactInfo />
+          <SnapshotCards />
+        </div>
+
+        {/* Mobile layout: cards first (like testimonials in template), then contact */}
+        <div className="lg:hidden flex flex-col gap-10">
+          <SnapshotCards />
+          <ContactInfo />
+        </div>
+
+        <div className="text-center mt-8 text-[#666] text-xs tracking-wide">
+          Built by Trenton vonHartitzsch &middot; {new Date().getFullYear()}
+        </div>
       </div>
     </section>
   );
